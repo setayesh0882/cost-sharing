@@ -1,26 +1,15 @@
 import { useState, useEffect } from "react";
+import Members from "./Members";
 
 export default function Expense() {
   const [expense, setExpense] = useState("");
   const [recordExpense, setRecordExpense] = useState([]);
   const [title, setTitle] = useState("");
   const [recordTitle, setRecordTitle] = useState([]);
-  const [membersList, setMembersList] = useState([]); 
-  const [selectedMember, setSelectedMember] = useState(""); 
-  const [listOfMembers , setListOfMembers] = useState ([]);
-  const [selectMembers , setSelectMembers] = useState ("");
-
-
-  // useEffect (()=>{
-  //   const storedMemberList = localStorage.getItem ("membersList");
-  //   if (storedMemberList) {
-  //     setSelectedMember (JSON.parse(storedMemberList));
-  //   }
-  // },[]);
-
-  // useEffect (()=>{
-  //   localStorage.setItem("membersList" , JSON.stringify(selectedMember));
-  // }, [selectedMember]);
+  const [membersList, setMembersList] = useState([]);
+  const [selectedMember, setSelectedMember] = useState("");
+  // const [listOfMembers, setListOfMembers] = useState([]);
+  const [selectMembers, setSelectMembers] = useState("");
 
 
   useEffect(() => {
@@ -28,57 +17,49 @@ export default function Expense() {
     if (storedExpense) {
       setRecordExpense(JSON.parse(storedExpense));
     }
-  }, []);
 
-  useEffect(() => {
-    localStorage.setItem("expense", JSON.stringify(recordExpense));
-  }, [recordExpense]);
-
-  useEffect(() => {
     const storedMembers = localStorage.getItem("members");
     if (storedMembers) {
       setMembersList(JSON.parse(storedMembers));
     }
   }, []);
 
-  //   useEffect(() => {
-//     const storedTitle = localStorage.getItem("title");
-//     if (storedTitle) {
-//       setRecordTitle(JSON.parse(storedTitle));
-//     }
-//   }, []);
+  useEffect(() => {
+    localStorage.setItem("expense", JSON.stringify(recordExpense));
+  }, [recordExpense]);
 
-//   useEffect(() => {
-//     localStorage.setItem("title", JSON.stringify(recordTitle));
-//   }, [recordTitle]);
+  const handleShowExpense = () => {
+    if (expense.trim() === "" || selectedMember.trim() === "") return;
+    setRecordExpense([...recordExpense, `${selectedMember}: ${expense}`]);
+    setExpense("");
+  };
+
 
 
   const handleShowTitle = () => {
-    if (title.trim() === "" || selectedMember ==="" ) return;
-    setRecordTitle([...recordTitle, `$ {selectedMember}: $ {title}`]);
+    if (title.trim() === "" || selectMembers.trim() === "") return;
+    setRecordTitle([...recordTitle, `${selectMembers} : ${title}`]);
     setTitle("");
-    selectedMember('');
   };
 
-    const handleShowExpense = () => {
-    if (expense.toString().trim() === "") return; 
-    setRecordExpense([...recordExpense, expense]);
-    setExpense("");
-  };
 
 
   return (
     <div>
       <h2>ثبت خرج صورت گرفته</h2>
-      
-      <select value={selectedMember} onChange={(e) => setSelectedMember(e.target.value)}>
-        <option value="">-- انتخاب پرداخت کننده --</option>
-        {membersList.map((member, idx) => (
-          <option key={idx} value={member}>
+
+      <select
+        value={selectedMember}
+        onChange={(e) => setSelectedMember(e.target.value)}
+      >
+        <option value="">انتخاب پرداخت کننده</option>
+        {membersList.map((member, index) => (
+          <option key={index} value={member}>
             {member}
           </option>
         ))}
       </select>
+
 
       <input
         type="number"
@@ -95,7 +76,21 @@ export default function Expense() {
         ))}
       </ul>
 
+
+
+
       <h2>عنوان هزینه</h2>
+
+      <select
+        value={selectMembers}
+        onChange={(e) => setSelectMembers(e.target.value)}>
+        <option value="">انتخاب اعضا</option>
+        {membersList.map((member, index) => (
+          <option key={index} value={member}>{member}</option>
+        ))}
+      </select>
+
+
       <input
         type="text"
         value={title}
