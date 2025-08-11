@@ -5,6 +5,23 @@ export default function Expense() {
   const [recordExpense, setRecordExpense] = useState([]);
   const [title, setTitle] = useState("");
   const [recordTitle, setRecordTitle] = useState([]);
+  const [membersList, setMembersList] = useState([]); 
+  const [selectedMember, setSelectedMember] = useState(""); 
+  const [listOfMembers , setListOfMembers] = useState ([]);
+  const [selectMembers , setSelectMembers] = useState ("");
+
+
+  // useEffect (()=>{
+  //   const storedMemberList = localStorage.getItem ("membersList");
+  //   if (storedMemberList) {
+  //     setSelectedMember (JSON.parse(storedMemberList));
+  //   }
+  // },[]);
+
+  // useEffect (()=>{
+  //   localStorage.setItem("membersList" , JSON.stringify(selectedMember));
+  // }, [selectedMember]);
+
 
   useEffect(() => {
     const storedExpense = localStorage.getItem("expense");
@@ -17,7 +34,14 @@ export default function Expense() {
     localStorage.setItem("expense", JSON.stringify(recordExpense));
   }, [recordExpense]);
 
-//   useEffect(() => {
+  useEffect(() => {
+    const storedMembers = localStorage.getItem("members");
+    if (storedMembers) {
+      setMembersList(JSON.parse(storedMembers));
+    }
+  }, []);
+
+  //   useEffect(() => {
 //     const storedTitle = localStorage.getItem("title");
 //     if (storedTitle) {
 //       setRecordTitle(JSON.parse(storedTitle));
@@ -28,21 +52,34 @@ export default function Expense() {
 //     localStorage.setItem("title", JSON.stringify(recordTitle));
 //   }, [recordTitle]);
 
-  const handleShowExpense = () => {
-    if (expense.toString().trim() === "") return; // اگر می‌خوای این خط بمونه
+
+  const handleShowTitle = () => {
+    if (title.trim() === "" || selectedMember ==="" ) return;
+    setRecordTitle([...recordTitle, `$ {selectedMember}: $ {title}`]);
+    setTitle("");
+    selectedMember('');
+  };
+
+    const handleShowExpense = () => {
+    if (expense.toString().trim() === "") return; 
     setRecordExpense([...recordExpense, expense]);
     setExpense("");
   };
 
-  const handleShowTitle = () => {
-    if (title.trim() === "") return;
-    setRecordTitle([...recordTitle, title]);
-    setTitle("");
-  };
 
   return (
     <div>
       <h2>ثبت خرج صورت گرفته</h2>
+      
+      <select value={selectedMember} onChange={(e) => setSelectedMember(e.target.value)}>
+        <option value="">-- انتخاب پرداخت کننده --</option>
+        {membersList.map((member, idx) => (
+          <option key={idx} value={member}>
+            {member}
+          </option>
+        ))}
+      </select>
+
       <input
         type="number"
         value={expense}
