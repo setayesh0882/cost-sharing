@@ -6,8 +6,8 @@ export default function Expense() {
   const [title, setTitle] = useState("");
   const [recordTitle, setRecordTitle] = useState([]);
   const [membersList, setMembersList] = useState([]);
-  const [selectedMember, setSelectedMember] = useState(""); // پرداخت‌کننده
-  const [selectedMembersList, setSelectedMembersList] = useState([]); // اعضای دخیل
+  const [selectedMember, setSelectedMember] = useState(""); 
+  const [selectedMembersList, setSelectedMembersList] = useState([]); 
 
   useEffect(() => {
     const storedExpense = localStorage.getItem("expense");
@@ -32,7 +32,7 @@ export default function Expense() {
     if (!expense.trim() || !selectedMember.trim()) return;
     setRecordExpense([
       ...recordExpense,
-      `پرداخت‌کننده: ${selectedMember} | مبلغ: ${expense}`
+      `پرداخت‌ کننده: ${selectedMember} | مبلغ: ${expense}`
     ]);
     setExpense("");
   };
