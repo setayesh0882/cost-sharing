@@ -6,8 +6,8 @@ export default function Expense() {
   const [title, setTitle] = useState("");
   const [recordTitle, setRecordTitle] = useState([]);
   const [membersList, setMembersList] = useState([]);
-  const [selectedMember, setSelectedMember] = useState("");
-  const [selectMembers, setSelectMembers] = useState("");
+  const [selectedMember, setSelectedMember] = useState(""); // پرداخت‌کننده
+  const [selectedMembersList, setSelectedMembersList] = useState([]); // اعضای دخیل
 
   useEffect(() => {
     const storedExpense = localStorage.getItem("expense");
@@ -30,14 +30,29 @@ export default function Expense() {
 
   const handleShowExpense = () => {
     if (!expense.trim() || !selectedMember.trim()) return;
-    setRecordExpense([...recordExpense, `${selectedMember}: ${expense}`]);
+    setRecordExpense([
+      ...recordExpense,
+      `پرداخت‌کننده: ${selectedMember} | مبلغ: ${expense}`
+    ]);
     setExpense("");
   };
 
+  const handleToggleMember = (member) => {
+    if (selectedMembersList.includes(member)) {
+      setSelectedMembersList(selectedMembersList.filter((m) => m !== member));
+    } else {
+      setSelectedMembersList([...selectedMembersList, member]);
+    }
+  };
+
   const handleShowTitle = () => {
-    if (!title.trim() || !selectMembers.trim()) return;
-    setRecordTitle([...recordTitle, `${selectMembers}: ${title}`]);
+    if (!title.trim() || selectedMembersList.length === 0) return;
+    setRecordTitle([
+      ...recordTitle,
+      `اعضا: ${selectedMembersList.join(", ")} | عنوان: ${title}`
+    ]);
     setTitle("");
+    setSelectedMembersList([]);
   };
 
   const handleDeleteExpense = (indexDelete) => {
@@ -84,20 +99,19 @@ export default function Expense() {
 
       <hr />
 
+      <h2>انتخاب اعضا</h2>
+      {membersList.map((member, index) => (
+        <label key={index} style={{ display: "block" }}>
+          <input
+            type="checkbox"
+            checked={selectedMembersList.includes(member)}
+            onChange={() => handleToggleMember(member)}
+          />
+          {member}
+        </label>
+      ))}
+
       <h2>ثبت عنوان هزینه</h2>
-
-      <select
-        value={selectMembers}
-        onChange={(e) => setSelectMembers(e.target.value)}
-      >
-        <option value="">انتخاب اعضا</option>
-        {membersList.map((member, index) => (
-          <option key={index} value={member}>
-            {member}
-          </option>
-        ))}
-      </select>
-
       <input
         type="text"
         value={title}
@@ -106,7 +120,7 @@ export default function Expense() {
       />
       <button onClick={handleShowTitle}>ثبت عنوان</button>
 
-      <h3>لیست عنوان‌ها</h3>
+      <h3>لیست عنوان‌</h3>
       <ul>
         {recordTitle.map((tit, index) => (
           <li key={index}>
