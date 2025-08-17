@@ -6,8 +6,7 @@ export default function Expense() {
   const [title, setTitle] = useState("");
   const [recordTitle, setRecordTitle] = useState([]);
   const [membersList, setMembersList] = useState([]);
-  const [selectedMember, setSelectedMember] = useState(""); 
-  const [selectedMembersList, setSelectedMembersList] = useState([]); 
+  const [memberAmounts, setMemberAmounts] = useState({});
 
   useEffect(() => {
     const storedExpense = localStorage.getItem("expense");
@@ -29,69 +28,82 @@ export default function Expense() {
   }, [recordTitle]);
 
   const handleShowExpense = () => {
-    if (!expense.trim() || !selectedMember.trim()) return;
+    let total = 0;
+    membersList.forEach((m) => {
+      total += Number(memberAmounts[m] || 0);
+    });
+
+    if (total !== Number(expense)) {
+      alert("جمع مبلغ وارد شده برای اعضا باید برابر با مبلغ کل باشد");
+      return;
+    }
+
     setRecordExpense([
       ...recordExpense,
-      `پرداخت‌ کننده: ${selectedMember} | مبلغ: ${expense}`
+      { total: expense, details: { ...memberAmounts } },
     ]);
+
     setExpense("");
+    setMemberAmounts({});
   };
 
-  const handleToggleMember = (member) => {
-    if (selectedMembersList.includes(member)) {
-      setSelectedMembersList(selectedMembersList.filter((m) => m !== member));
-    } else {
-      setSelectedMembersList([...selectedMembersList, member]);
-    }
+  const handleDeleteExpense = (index) => {
+    setRecordExpense(recordExpense.filter((_, i) => i !== index));
   };
 
   const handleShowTitle = () => {
-    if (!title.trim() || selectedMembersList.length === 0) return;
-    setRecordTitle([
-      ...recordTitle,
-      `اعضا: ${selectedMembersList.join(", ")} | عنوان: ${title}`
-    ]);
+    if (!title.trim()) return;
+    setRecordTitle([...recordTitle, title]);
     setTitle("");
-    setSelectedMembersList([]);
   };
 
-  const handleDeleteExpense = (indexDelete) => {
-    setRecordExpense(recordExpense.filter((_, index) => index !== indexDelete));
-  };
-
-  const handleDeleteTitle = (indexDelete) => {
-    setRecordTitle(recordTitle.filter((_, index) => index !== indexDelete));
+  const handleDeleteTitle = (index) => {
+    setRecordTitle(recordTitle.filter((_, i) => i !== index));
   };
 
   return (
     <div>
       <h2>ثبت خرج صورت گرفته</h2>
 
-      <select
-        value={selectedMember}
-        onChange={(e) => setSelectedMember(e.target.value)}
-      >
-        <option value="">انتخاب پرداخت کننده</option>
-        {membersList.map((member, index) => (
-          <option key={index} value={member}>
-            {member}
-          </option>
-        ))}
-      </select>
-
       <input
         type="number"
         value={expense}
         onChange={(e) => setExpense(e.target.value)}
-        placeholder="لطفا مبلغ را وارد کنید"
+        placeholder="مبلغ کل را وارد کنید"
       />
+
+      <h4>مبلغ هر عضو</h4>
+      {membersList.map((member, index) => (
+        <div key={index}>
+          {member}:{" "}
+          <input
+            type="number"
+            value={memberAmounts[member] || ""}
+            onChange={(e) =>
+              setMemberAmounts({
+                ...memberAmounts,
+                [member]: e.target.value,
+              })
+            }
+            placeholder="مبلغ پرداخت شده"
+          />
+        </div>
+      ))}
+
       <button onClick={handleShowExpense}>ثبت هزینه</button>
 
       <h3>لیست هزینه‌ها</h3>
       <ul>
         {recordExpense.map((exp, index) => (
           <li key={index}>
-            {exp}
+            <b>مبلغ کل:</b> {exp.total}
+            <ul>
+              {Object.entries(exp.details).map(([member, amount]) => (
+                <li key={member}>
+                  {member}: {amount}
+                </li>
+              ))}
+            </ul>
             <button onClick={() => handleDeleteExpense(index)}>حذف</button>
           </li>
         ))}
@@ -99,32 +111,20 @@ export default function Expense() {
 
       <hr />
 
-      <h2>انتخاب اعضا</h2>
-      {membersList.map((member, index) => (
-        <label key={index} style={{ display: "block" }}>
-          <input
-            type="checkbox"
-            checked={selectedMembersList.includes(member)}
-            onChange={() => handleToggleMember(member)}
-          />
-          {member}
-        </label>
-      ))}
-
       <h2>ثبت عنوان هزینه</h2>
       <input
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="لطفا عنوان هزینه را وارد کنید"
+        placeholder="عنوان هزینه"
       />
       <button onClick={handleShowTitle}>ثبت عنوان</button>
 
-      <h3>لیست عنوان‌</h3>
+      <h3>لیست عنوان‌ها</h3>
       <ul>
         {recordTitle.map((tit, index) => (
           <li key={index}>
-            {tit}
+            {tit}{" "}
             <button onClick={() => handleDeleteTitle(index)}>حذف</button>
           </li>
         ))}
