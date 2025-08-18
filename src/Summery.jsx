@@ -37,7 +37,6 @@ export default function Summary() {
             <ul>
                 {members.map((member) => (
                     <li
-                        // key={member}
                         style={{ cursor: "pointer" }}
                         onClick={() => handleClickMember(member)}
                     >
