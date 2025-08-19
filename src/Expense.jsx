@@ -7,6 +7,8 @@ export default function Expense() {
   const [recordTitle, setRecordTitle] = useState([]);
   const [membersList, setMembersList] = useState([]);
   const [memberAmounts, setMemberAmounts] = useState({});
+  const [memberPercents, setMemberPercents] = useState({});
+  const [usePercent, setUsePercent] = useState(false);
 
   useEffect(() => {
     const storedExpense = localStorage.getItem("expense");
@@ -28,23 +30,35 @@ export default function Expense() {
   }, [recordTitle]);
 
   const handleShowExpense = () => {
-    let total = 0;
-    membersList.forEach((m) => {
-      total += Number(memberAmounts[m] || 0);
-    });
-
-    if (total !== Number(expense)) {
-      alert("جمع مبلغ وارد شده برای اعضا باید برابر با مبلغ کل باشد");
-      return;
+    if (usePercent) {
+      let totalPercent = 0;
+      membersList.forEach((m) => {
+        totalPercent += Number(memberPercents[m] || 0);
+      });
+      if (totalPercent !== 100) {
+        alert("جمع درصدها باید 100 باشد");
+        return;
+      }
+      const details = {};
+      membersList.forEach((m) => {
+        details[m] = ((Number(expense) * Number(memberPercents[m])) / 100).toFixed(2);
+      });
+      setRecordExpense([...recordExpense, { total: expense, details }]);
+    } else {
+      let total = 0;
+      membersList.forEach((m) => {
+        total += Number(memberAmounts[m] || 0);
+      });
+      if (total !== Number(expense)) {
+        alert("جمع مبلغ وارد شده برای اعضا باید برابر با مبلغ کل باشد");
+        return;
+      }
+      setRecordExpense([...recordExpense, { total: expense, details: { ...memberAmounts } }]);
     }
-
-    setRecordExpense([
-      ...recordExpense,
-      { total: expense, details: { ...memberAmounts } },
-    ]);
 
     setExpense("");
     setMemberAmounts({});
+    setMemberPercents({});
   };
 
   const handleDeleteExpense = (index) => {
@@ -72,21 +86,39 @@ export default function Expense() {
         placeholder="مبلغ کل را وارد کنید"
       />
 
-      <h4>مبلغ هر عضو</h4>
+      <div>
+        <label>
+          <input
+            type="checkbox"
+            checked={usePercent}
+            onChange={() => setUsePercent(!usePercent)}
+          />{" "}
+          وارد کردن درصد
+        </label>
+      </div>
+
       {membersList.map((member, index) => (
         <div key={index}>
           {member}:{" "}
-          <input
-            type="number"
-            value={memberAmounts[member] || ""}
-            onChange={(e) =>
-              setMemberAmounts({
-                ...memberAmounts,
-                [member]: e.target.value,
-              })
-            }
-            placeholder="مبلغ پرداخت شده"
-          />
+          {usePercent ? (
+            <input
+              type="number"
+              value={memberPercents[member] || ""}
+              onChange={(e) =>
+                setMemberPercents({ ...memberPercents, [member]: e.target.value })
+              }
+              placeholder="% سهم"
+            />
+          ) : (
+            <input
+              type="number"
+              value={memberAmounts[member] || ""}
+              onChange={(e) =>
+                setMemberAmounts({ ...memberAmounts, [member]: e.target.value })
+              }
+              placeholder="مبلغ پرداخت شده"
+            />
+          )}
         </div>
       ))}
 
