@@ -82,7 +82,7 @@ export default function Reckoning() {
       </ul>
 
       {transactions.length > 0 && (
-        <button onClick={downloadData}>دانلود به فایل</button>
+        <button onClick={downloadData}>دانلود فایل</button>
       )}
     </div>
   );
